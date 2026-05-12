@@ -1,0 +1,110 @@
+version: '3.8'
+
+networks:
+ network:
+    driver: bridge
+
+volumes:
+  postgres_api_data:
+  postgres_worker_data:
+  uploads_data:        # общий том для PDF-файлов
+
+services:
+  postgres_api:
+    image: postgres:15
+    container_name: pdf_postgres_api
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: apigatewaydb
+    ports:
+      - "5433:5432"            
+    volumes:
+      - postgres_api_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d apigatewaydb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - network
+
+  postgres_worker:
+    image: postgres:15
+    container_name: pdf_postgres_worker
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: workerdb
+    ports:
+      - "5434:5432"           
+    volumes:
+      - postgres_worker_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d workerdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - network
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: pdf_rabbitmq
+    ports:
+      - "5672:5672"            
+      - "15672:15672"          
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - network
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: APIGateway/Dockerfile
+    container_name: api_gateway
+    ports:
+      - "5000:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://*:80
+      - ConnectionStrings__ApiDb=Host=postgres_api;Port=5432;Database=apigatewaydb;Username=admin;Password=admin
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__ServicePrefix=pdf
+      - FileStorage__BasePath=/app/Uploads
+    volumes:
+      - uploads_data:/app/Uploads
+    depends_on:
+      postgres_api:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - network
+
+  background-worker:
+    build:
+      context: .
+      dockerfile: BackgroundWorker/Dockerfile
+    container_name: background_worker
+    environment:
+      - DOTNET_ENVIRONMENT=Development
+      - ConnectionStrings__WorkerDb=Host=postgres_worker;Port=5432;Database=workerdb;Username=admin;Password=admin
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__ServicePrefix=pdf
+      - FileStorage__BasePath=/app/Uploads
+    volumes:
+      - uploads_data:/app/Uploads
+    depends_on:
+      postgres_worker:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - network

@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "APIGateway", "APIGateway\APIGateway.csproj", "{ABC54BF3-67C5-43C9-B4DF-3F56CC840B6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BackgroundWorker", "BackgroundWorker\BackgroundWorker.csproj", "{4F72AE92-0450-4268-A4A6-FE973C480132}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{0B92522E-0395-400F-9804-3A70CB1521C3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{68114C00-865B-4010-91CF-3409F79A1B3D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ABC54BF3-67C5-43C9-B4DF-3F56CC840B6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABC54BF3-67C5-43C9-B4DF-3F56CC840B6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABC54BF3-67C5-43C9-B4DF-3F56CC840B6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABC54BF3-67C5-43C9-B4DF-3F56CC840B6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F72AE92-0450-4268-A4A6-FE973C480132}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F72AE92-0450-4268-A4A6-FE973C480132}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F72AE92-0450-4268-A4A6-FE973C480132}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F72AE92-0450-4268-A4A6-FE973C480132}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B92522E-0395-400F-9804-3A70CB1521C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B92522E-0395-400F-9804-3A70CB1521C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B92522E-0395-400F-9804-3A70CB1521C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B92522E-0395-400F-9804-3A70CB1521C3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
