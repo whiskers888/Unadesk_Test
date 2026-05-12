@@ -32,7 +32,7 @@ docker-compose up --build
 После успешного запуска будут доступны:
 - **API Gateway**: http://localhost:5000/swagger
 
-3. Swagger содержит следующие эндпоинты:
+Swagger содержит следующие эндпоинты:
    - `POST /api/Documents/upload` – загрузка PDF-файл (multipart/form-data)
    - `GET /api/Documents` – список документов с их статусами
    - `GET /api/Documents/{id}/text` – извлечённый текст после обработки
