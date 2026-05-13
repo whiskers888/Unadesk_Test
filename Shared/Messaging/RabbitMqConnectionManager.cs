@@ -7,33 +7,37 @@ public class RabbitMqConnectionManager(IConfiguration config) : IAsyncDisposable
 {
     private IConnection? _connection;
     private IChannel? _publishChannel;
-    private readonly SemaphoreSlim _lock = new(1, 1);
+    private readonly SemaphoreSlim _connectionLock = new(1, 1);
+    private readonly SemaphoreSlim _channelLock = new(1, 1);
 
     private async Task<IConnection> GetConnectionAsync()
     {
         if (_connection != null) return _connection;
-        await _lock.WaitAsync();
+        await _connectionLock.WaitAsync();
         try
         {
             return _connection ??= await CreateConnectionAsync();
         }
         finally
         {
-            _lock.Release();
+            _connectionLock.Release();
         }
     }
 
     private async Task<IChannel> GetPublishChannelAsync()
     {
         if (_publishChannel != null) return _publishChannel;
-        await _lock.WaitAsync();
+        await _channelLock.WaitAsync();
         try
         {
-            return _publishChannel ??= await (await GetConnectionAsync()).CreateChannelAsync();
+            if (_publishChannel != null) return _publishChannel; // double-check
+            var connection = await GetConnectionAsync(); // здесь уже не захватывает _channelLock
+            _publishChannel = await connection.CreateChannelAsync();
+            return _publishChannel;
         }
         finally
         {
-            _lock.Release();
+            _channelLock.Release();
         }
     }
 
@@ -70,7 +74,17 @@ public class RabbitMqConnectionManager(IConfiguration config) : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        if (_publishChannel != null) await _publishChannel.CloseAsync();
-        if (_connection != null) await _connection.CloseAsync();
+        if (_publishChannel != null)
+        {
+            await _publishChannel.CloseAsync();
+            _publishChannel.Dispose();
+        }
+        if (_connection != null)
+        {
+            await _connection.CloseAsync();
+            _connection.Dispose();
+        }
+        _connectionLock.Dispose();
+        _channelLock.Dispose();
     }
 }
